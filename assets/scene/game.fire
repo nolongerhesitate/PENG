@@ -359,7 +359,9 @@
     "node": {
       "__id__": 7
     },
-    "_enabled": true
+    "_enabled": true,
+    "moveSpeed": 15,
+    "toPosX": 0
   },
   {
     "__type__": "cc.Widget",
@@ -412,7 +414,7 @@
     },
     "_enabled": true,
     "player": {
-      "__id__": 7
+      "__id__": 9
     }
   }
 ]
