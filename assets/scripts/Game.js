@@ -10,7 +10,7 @@
 
 const Player = require('Player');
 
-cc.Class({
+var Game = cc.Class({
     extends: cc.Component,
 
     properties: {
@@ -23,6 +23,7 @@ cc.Class({
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
+        this.fire = false;
         this.setInputControl();
     },
 
@@ -33,10 +34,23 @@ cc.Class({
     setInputControl: function () {
         var self = this
         self.node.on(cc.Node.EventType.TOUCH_START, function (touch, event) {
-            self.player.toPosX = touch.getLocationX() - self.node.width * 0.5;
+            self.player.startMove(touch.getLocationX() - self.node.width * 0.5);
+            self.fire = true;
         }, self.node);
+
+        self.node.on(self.node.on(cc.Node.EventType.TOUCH_MOVE, function (touch, event) {
+            self.player.startMove(touch.getLocationX() - self.node.width * 0.5);
+        }), self.node);
+
+        self.node.on(self.node.on(cc.Node.EventType.TOUCH_END, function (touch, event) {
+            self.player.stopMove();
+            self.fire = false;
+        }), self.node);
     },
 
     update(dt) {
+        if (this.fire) {
+            this.player.openFire(this);
+        }
     },
 });

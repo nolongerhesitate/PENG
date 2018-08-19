@@ -12,9 +12,15 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        //移动速度
-        moveSpeed: 5,
+        // 移动速度
+        MOVESPEED: 5,
+        // 子弹生成的Y 世界坐标
+        BULLET_SHOT_Y: -273,
         toPosX: 0,
+        bulletPrefab: {
+            default: null,
+            type: cc.Prefab,
+        },
         //需要加入边界，移动位置不得超过
     },
 
@@ -25,38 +31,30 @@ cc.Class({
         this.moveLeft = false;
         this.moveRight = false;
         this.toPosX = this.node.x;
+        this.moveSpeed = this.MOVESPEED
+
+        // initialize bullet
+        this.bulletPool = new cc.NodePool('bullet_2_orange');
     },
 
     start() {
 
     },
 
-    startMoveTo: function (xPos) {
-        console.log(xPos + "++++++++++++++" + this.node.x);
-        if (xPos < this.node.x) {  //向左移动 
-            this.moveLeft = true;
-            this.moveRight = false;
-        } else if (xPos > this.node.x) { //向右移动
-            this.moveLeft = false;
-            this.moveRight = true;
-        } else {  //不动
-            this.moveLeft = false;
-            this.moveRight = false;
-        }
+    startMove: function (xPos) {
+        this.moveSpeed = this.MOVESPEED
+        this.toPosX = xPos
     },
 
-
     update(dt) {
-        /*
-        if (this.moveLeft) {
-            this.node.x -= this.moveSpeed;
-        } else if (this.moveRight) {
-            this.node.x += this.moveSpeed;
+        // limit player position inside screen
+        if (this.node.x > this.node.parent.width / 2) {
+            this.node.x = this.node.parent.width / 2;
+            this.moveSpeed = 0;
+        } else if (this.node.x < -this.node.parent.width / 2) {
+            this.node.x = -this.node.parent.width / 2;
+            this.moveSpeed = 0;
         }
-        */
-
-        // console.log("before" + this.node.x);
-        console.log("speed" + this.moveSpeed);
 
         if (Math.abs(this.toPosX - this.node.x) <= this.moveSpeed) {
             this.node.x = this.toPosX
@@ -67,16 +65,26 @@ cc.Class({
         } else if (this.toPosX > this.node.x) { //向右移动
             this.node.x += this.moveSpeed;
         }
-
-        // console.log("after" + this.node.x);
-
-        // limit player position inside screen
-        if (this.node.x > this.node.parent.width / 2) {
-            this.node.x = this.node.parent.width / 2;
-            this.moveSpeed = 0;
-        } else if (this.node.x < -this.node.parent.width / 2) {
-            this.node.x = -this.node.parent.width / 2;
-            this.moveSpeed = 0;
-        }
     },
+
+    stopMove: function () {
+        this.moveSpeed = 0;
+    },
+
+    openFire: function (Game) {
+        var newBullet = null;
+        if (this.bulletPool.size() > 0) {
+            newBullet = this.bulletPool.get(this);
+        } else {
+            newBullet = cc.instantiate(this.bulletPrefab);
+        }
+        Game.node.addChild(newBullet);
+        newBullet.setPosition(cc.p(this.node.x, this.BULLET_SHOT_Y));
+        newBullet.getComponent('Bullet').init(Game, this);
+    },
+
+    desBullet(bullet) {
+        this.bulletPool.put(bullet);
+    },
+
 });
